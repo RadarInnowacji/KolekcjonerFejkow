@@ -1,91 +1,217 @@
-# Follow the Fake – kolekcjoner fejków
+<p align="center">
+  <img src="docs/banner.png" alt="Follow the Fake – z chaosu fałszywych reklam mapa kampanii oszustów" width="100%">
+</p>
 
-Demonstrator rozwiązania wyzwania **„Kolekcjoner fejków / Follow the Fake”** (NASK PIB, HackNation).
-Narzędzie łączy pojedyncze podejrzane reklamy w **kampanie** na podstawie śladów tekstowych, wizualnych, semantycznych i infrastrukturalnych. **Każde powiązanie jest uzasadnione** listą przesłanek.
+<p align="center">
+  <img src="https://img.shields.io/badge/HackNation-2026-00ff41?style=for-the-badge&labelColor=000000" alt="HackNation 2026">
+  <img src="https://img.shields.io/badge/wyzwanie-Kolekcjoner%20fejk%C3%B3w%20%C2%B7%20NASK-00ff41?style=for-the-badge&labelColor=000000" alt="Wyzwanie NASK">
+  <img src="https://img.shields.io/badge/zesp%C3%B3%C5%82-MORFEUSZ%20%C2%B7%2011G-ff3b5c?style=for-the-badge&labelColor=000000" alt="Zespół Morfeusz">
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.10%2B-00ff41?style=flat-square&logo=python&logoColor=00ff41&labelColor=000000" alt="Python 3.10+">
+  <img src="https://img.shields.io/badge/docker-ready-00ff41?style=flat-square&logo=docker&logoColor=00ff41&labelColor=000000" alt="Docker">
+  <img src="https://img.shields.io/badge/mobile-Expo%20%C2%B7%20React%20Native-00ff41?style=flat-square&logo=expo&logoColor=00ff41&labelColor=000000" alt="Expo">
+  <img src="https://img.shields.io/badge/graf-Neo4j%20export-00ff41?style=flat-square&logo=neo4j&logoColor=00ff41&labelColor=000000" alt="Neo4j">
+  <img src="https://img.shields.io/badge/klucze%20API-niewymagane-00ff41?style=flat-square&labelColor=000000" alt="Bez kluczy API">
+</p>
 
-Opis metody: **[METODYKA.md](METODYKA.md)** (również w zakładce *Metodyka* w aplikacji).
-
-## Co potrafi
-
-- **Wejście:** URL (również skrócony lub z kodu QR), tekst lub log komunikacji lub nazwa produktu, zrzut ekranu, kreacja, **wideo**, zapisana strona **HTML**, TXT/EML/LOG, cały zbiór (ZIP/JSON/JSONL/CSV, nazwy pól rozpoznawane automatycznie).
-- **Ekstrakcja cech:**
-  - treść: OCR (pol+eng), słowa kluczowe, tematy, chwyty manipulacyjne;
-  - byty: osoby (baza referencyjna), marki/logotypy, **podszywanie się**, telefony, portfele krypto;
-  - obraz: hashe percepcyjne kreacji wyciętej ze zrzutu, paleta, twarze, klatki wideo, **kody QR**;
-  - infrastruktura: łańcuch przekierowań (HTTP + meta-refresh + JS), RDAP (rejestrator, data, DNS), IP i sieć, certyfikat TLS i crt.sh, **trackery** (FB Pixel, GA, GTM, TikTok…), favicon, **odcisk struktury DOM** (scam-kit), formularze z polami wrażliwymi.
-- **Korelacja:** podobieństwo ważone w 6 kanałach, odporne na brak danych, twarde dowody, duplikaty i warianty, grupowanie dwuetapowe (union-find + average linkage), kampanie podobne.
-- **Nowy materiał:** *duplikat* / *znana kampania* / *nowy wzorzec*, z pewnością, rankingiem kampanii i listą podobnych incydentów.
-- **Prezentacja:** karty kampanii, interaktywny graf powiązań z przesłankami na krawędziach, szczegóły materiału.
-- **Ocena:** ARI, NMI, F1 par, B-cubed, test przypisywania nowych materiałów.
-- **Eksport:** Neo4j (Cypher), CSV z przesłankami, JSON.
-- **Harmonogram:** cykliczne skanowanie Biblioteki Reklam Meta po słowach kluczowych i ponowne sprawdzanie znanych domen.
-
-## Uruchomienie
-
-### Windows – najprościej
-Dwuklik na **`START.bat`**. Za pierwszym razem skrypt utworzy środowisko i zainstaluje biblioteki (1–3 minuty), potem otworzy przeglądarkę na `http://localhost:8000`.
-W zakładce **Zbiór danych** kliknij **„Wczytaj zbiór demonstracyjny”**.
-
-OCR jest opcjonalny. Bez niego działa wszystko poza odczytem tekstu z obrazów. Aby go włączyć, zainstaluj Tesseract dla Windows (instalator UB Mannheim: https://github.com/UB-Mannheim/tesseract/wiki) i w kroku *Additional language data* zaznacz *Polish*. `START.bat` sam znajdzie go w `C:\Program Files\Tesseract-OCR`. Bez polskiego pakietu OCR działa w trybie angielskim.
-
-### Docker (zalecane do oceny – zawiera OCR z językiem polskim)
-```bash
-docker compose up --build
-# → http://localhost:8000
+```text
+$ ./follow --the-fake
+> pojedyncza reklama mówi mało. kampania pokazuje źródło.
+> 6 kanałów śladów · ważone podobieństwo · twarde dowody · każde powiązanie z uzasadnieniem_
 ```
 
-### Linux / macOS
-```bash
-./start.sh            # albo: python3 -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/python app.py
-```
-Wymagania: Python 3.10+, opcjonalnie `tesseract-ocr` + `tesseract-ocr-pol`.
+Fałszywe reklamy z wizerunkami znanych osób znikają po kilku godzinach i wracają pod nowymi domenami. Pojedyncze zgłoszenie niewiele mówi. Dopiero zestawienie wielu reklam pokazuje **wspólnego operatora**: ten sam piksel śledzący, ten sam szkielet strony, ten sam wizerunek, tę samą obietnicę zysku.
 
-### Konfiguracja (zmienne środowiskowe, wszystkie opcjonalne)
+**Follow the Fake** robi to automatycznie. Przyjmuje link, zrzut ekranu (również z kodem QR), film, stronę HTML albo cały zbiór reklam. Wyciąga z nich ślady, łączy materiały w **kampanie** i przy każdym połączeniu pokazuje **dlaczego**.
+
+---
+
+## ⚡ Szybki start
+
+> **Windows:** dwuklik na **`START.bat`** → przeglądarka otworzy `http://localhost:8000` → zakładka **„Zbiór danych”** → **„Wczytaj zbiór demonstracyjny”**.
+
+```bash
+# Docker (zawiera OCR z językiem polskim)
+docker compose up --build            # → http://localhost:8000
+
+# Linux / macOS
+./start.sh
+
+# ręcznie
+python -m venv .venv && .venv/bin/pip install -r requirements.txt && .venv/bin/python app.py
+```
+
+Wymagania: Python 3.10+. Opcjonalnie Tesseract OCR z pakietem `pol`. **Żadne klucze API nie są potrzebne.**
+
+---
+
+## 🖥️ Jak to wygląda
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/home.jpg" alt="Strona główna"><br><sub><b>Start</b> – statystyki zbioru i najnowsze kampanie</sub></td>
+    <td width="50%"><img src="docs/result.jpg" alt="Wynik analizy"><br><sub><b>Analiza</b> – znana kampania / duplikat / nowy wzorzec + przesłanki</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/graph.jpg" alt="Graf powiązań"><br><sub><b>Graf powiązań</b> – każda krawędź ma uzasadnienie, czerwone = twardy dowód</sub></td>
+    <td width="50%"><img src="docs/camps.jpg" alt="Kampanie"><br><sub><b>Kampanie</b> – wizerunki, domeny, trackery, okres aktywności, spójność</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/phone_home.jpg" alt="Wersja na telefon" width="230">
+  &nbsp;&nbsp;
+  <img src="docs/phone_result.jpg" alt="Wynik na telefonie" width="230">
+  <br><sub>Strona działa też na telefonie, jest też osobna aplikacja mobilna (<code>mobile/</code>).</sub>
+</p>
+
+---
+
+## 🧬 Jak to działa
+
+```mermaid
+flowchart LR
+    A["URL · zrzut ekranu · QR<br/>film · HTML · tekst · zbiór"] --> B["Ekstrakcja cech"]
+    B --> T["Tekst<br/>OCR + TF-IDF"]
+    B --> V["Wizual<br/>pHash / dHash kreacji"]
+    B --> P["Osoby<br/>wizerunki, twarze"]
+    B --> N["Narracja<br/>tematy, chwyty"]
+    B --> D["Domeny<br/>przekierowania, TLS"]
+    B --> I["Infrastruktura<br/>Pixel/GA, DNS, IP, DOM"]
+    T & V & P & N & D & I --> S["Ważone podobieństwo<br/>+ twarde dowody"]
+    S --> C["Grupowanie<br/>union-find + average linkage"]
+    C --> K["Kampanie + graf<br/>z przesłankami"]
+    S --> X{"Nowy materiał?"}
+    X -->|"≥ próg"| K1["Znana kampania / duplikat"]
+    X -->|"< próg"| K2["Nowy wzorzec"]
+```
+
+### 6 kanałów śladów
+
+| # | Kanał | Co porównujemy | Waga |
+|---|---|---|---|
+| 01 | **Tekst** | OCR + tekst strony, TF-IDF słów i n-gramów znakowych (odporne na odmianę i literówki) | 0.26 |
+| 02 | **Wizual** | pHash i dHash **samej kreacji wyciętej ze zrzutu** (bez ramki Facebooka/Instagrama), paleta barw | 0.20 |
+| 03 | **Osoby** | wizerunki z bazy referencyjnej, hashe wycinków twarzy | 0.12 |
+| 04 | **Narracja** | tematy (krypto, dopłata do paczki, „cudowny lek”…), chwyty manipulacyjne, marki | 0.10 |
+| 05 | **Domeny** | wspólne domeny, węzły w łańcuchu przekierowań, nazwy w certyfikatach TLS, wzorce nazw | 0.14 |
+| 06 | **Infrastruktura** | Facebook Pixel / GA / GTM / TikTok, favicon, IP, serwery DNS, rejestrator i data, **szkielet DOM (scam-kit)** | 0.18 |
+
+```text
+wynik = Σ wₖ·sₖ / Σ wₖ           ← tylko kanały dostępne w OBU materiałach
+        × (0.6 + 0.4·pokrycie)    ← brak danych ≠ różnica, ale niskie pokrycie lekko karze
+twardy dowód (ten sam Pixel, portfel, domena, identyczna kreacja…) → wynik ≥ 0.85
+```
+
+Każde połączenie dostaje listę przesłanek, np.:
+
+```text
+#1 ↔ #2   0.85  WARIANT
+  > Wspólny wizerunek: Robert Lewandowski
+  ! Wspólny identyfikator śledzący: facebook_pixel:704211993018456
+  > Ten sam szkielet strony (scam-kit), podobieństwo DOM = 1.00
+  > Podobny wzorzec nazw domen (teraz, zysk)
+```
+
+Pełny opis: **[METODYKA.md](METODYKA.md)** (również w zakładce *Metodyka* w aplikacji).
+
+---
+
+## 🧪 Wyniki
+
+| Test | Wynik |
+|---|---|
+| Grupowanie zbioru demo (30 materiałów, 6 kampanii + 3 legalne) | ARI **1.00** · F1 par **1.00** · B-cubed **1.00** |
+| Nowe materiały: warianty znanych kampanii, nowa kampania, 3 reklamy-pułapki | **10 / 10** |
+| Podwójny import tego samego zbioru (odporność na duplikaty) | te same kampanie, duplikaty oznaczone |
+
+> ⚠️ Zbiór demonstracyjny jest **syntetyczny** (`tools/make_demo.py`) i łatwiejszy od prawdziwych danych. Wyniki pokazują, że metoda działa zgodnie z założeniami, a nie jaka będzie skuteczność na zbiorze organizatora. Do oceny na prawdziwym zbiorze:
+>
+> ```bash
+> python tools/evaluate_dataset.py <folder | zbior.zip | dane.csv> [--network]
+> python tools/holdout_test.py
+> ```
+
+---
+
+## 🗂️ Co potrafi
+
+- **Wejście:** URL (również skrócony lub z kodu QR), tekst / log komunikacji / nazwa produktu, zrzut ekranu, kreacja, **wideo**, zapisana strona **HTML**, TXT/EML/LOG, cały zbiór **ZIP / JSON / JSONL / CSV** (nazwy pól rozpoznawane automatycznie).
+- **Śledztwo URL:** przekierowania HTTP + meta-refresh + JS, RDAP (rejestrator, data, DNS), IP i sieć, certyfikat TLS, crt.sh, favicon, trackery, formularze z polami wrażliwymi (karta, CVV, BLIK).
+- **Podszywanie się:** marka w tytule strony, a domena obca, np. „NASK | Program lojalnościowy” na cudzej domenie.
+- **Duplikaty i warianty**, **kampanie podobne** (ten sam operator, inna narracja).
+- **Nowy materiał** → *duplikat* / *znana kampania* / *nowy wzorzec*, z pewnością i rankingiem kampanii.
+- **Ocena jakości:** ARI, NMI, F1 par, B-cubed, test przypisywania nowych materiałów (leave-one-out).
+- **Eksport:** Neo4j (Cypher z uzasadnieniem każdej krawędzi), CSV, JSON.
+- **Harmonogram:** skanowanie **Biblioteki Reklam Meta** po słowach kluczowych + ponowne sprawdzanie znanych domen.
+- **Odporność na braki:** niedziałające strony, brak obrazu, brak metadanych – kanał jest pomijany, a nie liczony jako różnica.
+
+---
+
+## 📱 Aplikacja mobilna
+
+```bash
+# 1. serwer:  START.bat
+# 2. aplikacja:
+mobile/MOBILE.bat        # tworzy projekt Expo, instaluje biblioteki, pokazuje kod QR
+```
+
+Zeskanuj kod w **Expo Go**, a w aplikacji wpisz w *Ustawieniach* adres komputera (np. `http://192.168.1.23:8000`). Aplikacja robi to samo co strona: zrzut z rolki prosto z telefonu → wynik z przesłankami → zgłoszenie do CERT Polska.
+
+---
+
+## ⚙️ Konfiguracja
+
 | Zmienna | Znaczenie |
 |---|---|
-| `PORT`, `HOST` | port i interfejs serwera (domyślnie 8000, 0.0.0.0) |
+| `PORT`, `HOST` | port i interfejs serwera (domyślnie `8000`, `0.0.0.0`) |
 | `FTF_DB` | ścieżka bazy SQLite (domyślnie `data/ftf.sqlite`) |
-| `OCR_LANGS`, `TESSERACT_CMD` | języki OCR (`pol+eng`) i ścieżka do tesseract.exe |
-| `ANTHROPIC_API_KEY`, `CLAUDE_MODEL` | opcjonalny opis kreacji modelem wizyjnym (tekst, osoby, logotypy) |
-| `META_ACCESS_TOKEN` | token Ad Library API dla harmonogramu ([dostęp](https://www.facebook.com/ads/library/api)) |
+| `OCR_LANGS`, `TESSERACT_CMD` | języki OCR (`pol+eng`) i ścieżka do `tesseract.exe` |
+| `ANTHROPIC_API_KEY` | *opcjonalnie:* opis kreacji modelem wizyjnym (tekst, osoby, logotypy) |
+| `META_ACCESS_TOKEN` | *opcjonalnie:* token Ad Library API dla harmonogramu |
 
-### Rozpoznawanie twarzy (opcjonalne)
-```bash
-python tools/download_models.py      # modele YuNet + SFace (OpenCV Zoo)
-# zdjęcia referencyjne: data/faces/Robert Lewandowski/1.jpg, data/faces/Rafał Brzoska/1.jpg …
-```
-Bez modeli działa wykrywanie osób z tekstu (OCR, `data/persons.json`) i porównanie wycinków twarzy.
+Rozpoznawanie twarzy (opcjonalne): `python tools/download_models.py` + zdjęcia w `data/faces/<Imię Nazwisko>/`.
 
-## Aplikacja mobilna
+<details>
+<summary><b>📥 Format danych do importu</b></summary>
 
-Folder `mobile/` – klient React Native (Expo) robiący to samo co strona: zrzut ekranu, zdjęcie, film, link albo tekst
-→ znana kampania / duplikat / nowy wzorzec z przesłankami, przegląd kampanii i materiałów.
-Uruchomienie: serwer (`START.bat`), potem `mobile/MOBILE.bat` i kod QR w Expo Go. Szczegóły: [mobile/README.md](mobile/README.md).
-
-## Ocena na zbiorze organizatora
-
-Zbiór z polem etykiety (`label` / `campaign` / `cluster`) wczytaj w aplikacji, a wyniki pojawią się w zakładce *Ocena*. Można też z linii poleceń:
-```bash
-python tools/evaluate_dataset.py sciezka/do/zbioru            # folder z manifestem, .zip, .json lub .csv
-python tools/evaluate_dataset.py zbior.zip --network --json wyniki.json
-python tools/holdout_test.py                                 # test nowych wariantów i pułapek
-```
-Wyniki na syntetycznym zbiorze demonstracyjnym: ARI 1.0, F1 par 1.0, test nowych materiałów 10/10. To dowód, że metoda działa zgodnie z założeniami, **nie** prognoza skuteczności na danych organizatora. Patrz [METODYKA.md](METODYKA.md), sekcja 6.
-
-### Format danych (elastyczny)
 Manifest JSON (`{"items":[…]}` lub lista), JSONL albo CSV (separator `,` `;` lub tab). Rozpoznawane pola:
-- tekst: `text`, `body`, `ad_creative_bodies`, `description`, `caption`…
-- URL: `url`, `link`, `landing_url`, `link_url`…
-- plik: `image`, `screenshot`, `file`, `video`, `html` (ścieżka względna w ZIP/folderze)
-- etykieta: `label`, `campaign`, `cluster`; data: `date`, `ad_delivery_start_time`; id: `id`, `ad_id`
-- opcjonalnie gotowe metadane: `meta: {trackers, nameservers, ips, registrar, created, …}`
+
+| Rola | Nazwy pól |
+|---|---|
+| tekst | `text`, `body`, `ad_creative_bodies`, `description`, `caption` |
+| URL | `url`, `link`, `landing_url`, `link_url` |
+| plik | `image`, `screenshot`, `file`, `video`, `html` (ścieżka w ZIP/folderze) |
+| etykieta | `label`, `campaign`, `cluster` |
+| data / id | `date`, `ad_delivery_start_time` / `id`, `ad_id` |
+| metadane | `meta: {trackers, nameservers, ips, registrar, created, …}` |
 
 Folder bez manifestu też zadziała: każdy plik to osobny materiał.
+</details>
 
-## Struktura
+<details>
+<summary><b>🔌 API</b></summary>
 
-```
-app.py                 serwer WWW + API (biblioteka standardowa, ThreadingHTTPServer)
+| Metoda | Ścieżka | Opis |
+|---|---|---|
+| `POST` | `/api/analyze` | analiza materiału `{url, text, files[], network, save}` |
+| `POST` | `/api/import` | import zbioru `{zip_b64 \| raw, name, network}` |
+| `POST` | `/api/demo` | wczytanie zbioru demonstracyjnego |
+| `GET` | `/api/state` | statystyki, kampanie, materiały |
+| `GET` | `/api/graph` | węzły i krawędzie z przesłankami |
+| `GET` | `/api/item/<id>` | pełne cechy materiału + sąsiedzi |
+| `GET` | `/api/evaluate` | miary jakości (gdy są etykiety) |
+| `GET` | `/api/export/graph.cypher` | eksport do Neo4j |
+| `GET` | `/api/export/{materialy.csv, powiazania.csv, wyniki.json}` | eksport tabel i wyników |
+| `GET/POST` | `/api/scheduler`, `/api/scheduler/run` | harmonogram skanowania |
+</details>
+
+<details>
+<summary><b>🧱 Struktura projektu</b></summary>
+
+```text
+app.py                 serwer WWW + API (biblioteka standardowa)
 ftf/extract.py         ujednolicony rekord cech z dowolnego wejścia
 ftf/infra.py           przekierowania, HTML, trackery, DOM, RDAP, DNS, TLS, crt.sh
 ftf/visual.py          hashe percepcyjne, wycinanie kreacji, OCR, QR, twarze, wideo
@@ -97,28 +223,39 @@ ftf/scheduler.py       Biblioteka Reklam Meta + ponowne sprawdzanie domen
 ftf/export.py          Neo4j Cypher, CSV, JSON
 static/                interfejs WWW (HTML/CSS/JS bez zależności)
 mobile/                aplikacja mobilna (Expo / React Native)
-tools/                 zbiór demo, ocena, test hold-out, pobieranie modeli
+tools/                 zbiór demo, ocena, test hold-out, modele twarzy
 ```
+</details>
 
-## Biblioteki, modele i usługi (licencje)
+<details>
+<summary><b>📜 Biblioteki, modele, usługi i licencje</b></summary>
 
 | Komponent | Zastosowanie | Licencja |
 |---|---|---|
-| Python (stdlib: http.server, urllib, ssl, sqlite3) | serwer, sieć, baza | PSF |
-| NumPy | obliczenia | BSD-3 |
-| scikit-learn | TF-IDF, klastrowanie, miary | BSD-3 |
+| Python (stdlib) | serwer, sieć, SQLite | PSF |
+| NumPy · scikit-learn | obliczenia, TF-IDF, klastrowanie, miary | BSD-3 |
 | Pillow | obrazy, hashe percepcyjne | MIT-CMU (HPND) |
-| OpenCV (opencv-python-headless) | QR, wideo, twarze | Apache 2.0 |
-| Tesseract OCR (opcjonalny) | OCR pol+eng | Apache 2.0 |
-| YuNet, SFace – OpenCV Zoo (opcjonalne) | wykrywanie i rozpoznawanie twarzy | Apache 2.0 |
-| Czcionka Archivo (Google Fonts) | interfejs WWW i mobilny | SIL OFL 1.1 |
+| OpenCV | QR, wideo, twarze | Apache 2.0 |
+| Tesseract OCR *(opcjonalny)* | OCR pol+eng | Apache 2.0 |
+| YuNet, SFace – OpenCV Zoo *(opcjonalne)* | wykrywanie i rozpoznawanie twarzy | Apache 2.0 |
+| JetBrains Mono, Share Tech Mono | czcionki interfejsu | SIL OFL 1.1 |
 | Expo, React Native, expo-image-picker, AsyncStorage | aplikacja mobilna | MIT |
-| rdap.org | dane rejestracyjne domen i IP | usługa publiczna, bez klucza; limity zapytań |
-| crt.sh | Certificate Transparency | usługa publiczna, bez klucza; bywa przeciążona |
-| Meta Ad Library API (opcjonalne) | harmonogram | wymaga tokenu i weryfikacji tożsamości; regulamin Meta |
-| Anthropic Claude API (opcjonalne) | opis kreacji | wymaga klucza API, płatne za użycie |
+| rdap.org, crt.sh | metadane domen i certyfikatów | usługi publiczne, bez klucza |
+| Meta Ad Library API *(opcjonalne)* | harmonogram | token + regulamin Meta |
+| Anthropic Claude API *(opcjonalne)* | opis kreacji | klucz API, płatne za użycie |
+</details>
 
-Do oceny nie są potrzebne żadne klucze API: wszystkie funkcje podstawowe działają bez nich.
+---
 
-## Zbiór demonstracyjny
-`data/demo` to **zbiór syntetyczny** wygenerowany przez `tools/make_demo.py`: 30 materiałów, 6 kampanii i 3 legalne reklamy. Zawiera warianty, duplikaty, zrzuty z telefonu, materiały bez metadanych i dwie kampanie jednego operatora. Nie są to prawdziwe reklamy ani wizerunki. Materiały organizatora nie są dołączone (zasady wyzwania zabraniają ich rozpowszechniania).
+## 👾 Zespół
+
+<p align="center">
+  <b>MORFEUSZ</b> · stolik <b>11G</b> · Piotr Jarosz<br>
+  <sub>Wyzwanie „Kolekcjoner fejków / Follow the Fake” – NASK PIB · HackNation 2026</sub>
+</p>
+
+```text
+> widzisz podejrzaną reklamę? zgłoś ją: https://incydent.cert.pl
+> // projekt zespołu startującego w HackNation – nie jest oficjalnym narzędziem NASK ani CERT Polska.
+> // materiały organizatora nie są dołączone do repozytorium; zbiór demo jest syntetyczny.
+```
