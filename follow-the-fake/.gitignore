@@ -1,0 +1,7 @@
+.venv/
+__pycache__/
+*.pyc
+data/ftf.sqlite
+data/db/
+models/*.onnx
+data/faces/*/

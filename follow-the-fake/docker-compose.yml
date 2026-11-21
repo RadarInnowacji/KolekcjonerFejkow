@@ -1,0 +1,14 @@
+services:
+  follow-the-fake:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # opcjonalne – odkomentuj i uzupełnij
+      # ANTHROPIC_API_KEY: "sk-ant-..."
+      # META_ACCESS_TOKEN: "..."
+      OCR_LANGS: "pol+eng"
+    volumes:
+      - ftf-data:/app/data/db
+volumes:
+  ftf-data:

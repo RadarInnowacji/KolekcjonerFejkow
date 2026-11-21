@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Follow the Fake – analiza kampanii fałszywych reklam</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 44 44'%3E%3Crect width='44' height='44' fill='black'/%3E%3Ctext x='22' y='30' font-family='monospace' font-size='20' fill='%2300ff41' text-anchor='middle'%3E%3E_%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="logo" onclick="go('analiza')" title="Follow the Fake">
+      <span class="wordmark">FOLLOW<i>THE</i>FAKE</span>
+    </a>
+    <nav class="main">
+      <a data-v="analiza" class="on">Analiza</a>
+      <a data-v="kampanie">Kampanie</a>
+      <a data-v="graf">Graf powiązań</a>
+      <a data-v="zbior">Zbiór danych</a>
+      <a data-v="ocena">Ocena</a>
+      <a data-v="metodyka">Metodyka</a>
+    </nav>
+    <button class="btn btn-pill" onclick="go('analiza'); document.getElementById('inText').focus()">Analizuj <span class="burger">≡</span></button>
+  </div>
+</header>
+
+<section class="hero">
+  <canvas id="rain" aria-hidden="true"></canvas>
+  <svg class="hero-net" viewBox="0 0 800 600" preserveAspectRatio="xMaxYMid slice" aria-hidden="true">
+    <g stroke="#00ff41" stroke-opacity=".45" stroke-width="2">
+      <line x1="440" y1="90" x2="560" y2="150"/><line x1="560" y1="150" x2="500" y2="260"/><line x1="440" y1="90" x2="500" y2="260"/>
+      <line x1="690" y1="110" x2="740" y2="230"/><line x1="740" y1="230" x2="640" y2="290"/><line x1="690" y1="110" x2="640" y2="290"/>
+      <line x1="500" y1="260" x2="640" y2="290" stroke="#c9ffd8" stroke-opacity=".7" stroke-dasharray="6 8"/>
+    </g>
+    <line x1="560" y1="150" x2="690" y2="110" stroke="#ff3b5c" stroke-width="3"/>
+    <text x="575" y="112" font-size="13" fill="#ff7d93" font-family="JetBrains Mono, Consolas, monospace">ten_sam_pixel</text>
+    <g fill="#00ff41"><circle cx="440" cy="90" r="10"/><circle cx="560" cy="150" r="14"/><circle cx="500" cy="260" r="10"/><circle cx="690" cy="110" r="12"/><circle cx="640" cy="290" r="10"/></g>
+    <circle cx="740" cy="230" r="32" fill="#ff3b5c" opacity=".18"/><circle cx="740" cy="230" r="14" fill="#ff3b5c"/>
+  </svg>
+  <div class="wrap hero-in">
+    <span class="hero-tag">kolekcjoner_fejków · hacknation</span>
+    <h1 class="hero-wm">FOLLOW<i>THE</i>FAKE</h1>
+    <p class="hero-sub">łączę pojedyncze fałszywe reklamy w kampanie. każde powiązanie z uzasadnieniem. wybierz czerwoną pigułkę – zobacz, kto stoi za reklamami</p>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="go('analiza'); document.getElementById('inText').focus()">Analizuj materiał</button>
+      <button class="btn btn-ghost-light" onclick="go('zbior')">Wczytaj zbiór</button>
+    </div>
+    <div class="hero-chips"><span>tekst + OCR</span><span>wizerunki</span><span>kreacje</span><span>domeny</span><span class="r">trackery</span><span>scam-kit DOM</span><span>graf kampanii</span></div>
+  </div>
+  <div class="stats-dark"><div class="wrap">
+    <div class="s"><div class="n" id="stMat">0</div><div class="l">materiałów w zbiorze</div></div>
+    <div class="s"><div class="n" id="stCamp">0</div><div class="l">wykrytych kampanii</div></div>
+    <div class="s"><div class="n" id="stLinks">0</div><div class="l">uzasadnionych powiązań</div></div>
+    <div class="s"><div class="n" id="stDup">0</div><div class="l">duplikatów</div></div>
+    <div class="s"><div class="n" id="stDom">0</div><div class="l">domen w śledztwie</div></div>
+  </div></div>
+</section>
+
+<section class="latest"><div class="wrap">
+  <div class="latest-head"><h2 class="sec" style="margin:0">Najnowsze kampanie</h2><a onclick="go('kampanie')">Zobacz wszystkie →</a></div>
+  <div class="news" id="heroCards"></div>
+</div></section>
+
+<main><div class="wrap">
+
+<!-- ================= ANALIZA ================= -->
+<section class="view on" id="v-analiza">
+  <h2 class="sec">Analiza nowego materiału</h2>
+  <p class="secsub">Wklej adres reklamy lub strony, tekst (np. treść reklamy, log rozmowy, nazwę produktu) albo dodaj plik:
+    zrzut ekranu, kreację, wideo lub zapisaną stronę HTML. Materiał zostanie porównany z całym zbiorem.</p>
+  <div class="grid2">
+    <div class="card">
+      <label class="f" for="inUrl">Adres URL reklamy lub strony</label>
+      <input type="text" id="inUrl" placeholder="https://… (również link skrócony lub z kodu QR)">
+      <label class="f" for="inText">Tekst / wskazówka</label>
+      <textarea id="inText" placeholder="Treść reklamy, log komunikacji, nazwa produktu…"></textarea>
+      <label class="f">Pliki</label>
+      <div class="drop" id="drop"><b>Upuść pliki tutaj</b> lub kliknij, aby wybrać<br><span class="hint">PNG/JPG, MP4/MOV, HTML, TXT/EML/LOG · kody QR na obrazach są odczytywane</span></div>
+      <input type="file" id="inFiles" multiple hidden>
+      <div class="files" id="fileList"></div>
+      <div class="row" style="margin-top:18px; justify-content:space-between">
+        <div>
+          <label class="check"><input type="checkbox" id="optNet" checked> pobieraj metadane z sieci (przekierowania, WHOIS/RDAP, DNS, TLS)</label>
+          <label class="check"><input type="checkbox" id="optSave" checked> dodaj materiał do zbioru po analizie</label>
+        </div>
+        <button class="btn btn-primary" id="btnAnalyze" onclick="analyze()">Analizuj</button>
+      </div>
+    </div>
+    <div id="result"><div class="empty">
+      <h3 style="margin-bottom:6px">Wynik pojawi się tutaj</h3>
+      <div class="muted">Decyzja (znana kampania / duplikat / nowy wzorzec), lista podobnych incydentów<br>i przesłanki, które zadecydowały o powiązaniu.</div>
+    </div></div>
+  </div>
+  <div id="features" style="margin-top:24px"></div>
+</section>
+
+<!-- ================= KAMPANIE ================= -->
+<section class="view" id="v-kampanie">
+  <h2 class="sec">Kampanie</h2>
+  <p class="secsub">Grupy materiałów połączonych wspólnymi śladami. Spójność to średnie podobieństwo wewnątrz kampanii.
+    Na dole: kampanie podobne do siebie (możliwie ten sam operator lub szablon).</p>
+  <div id="campList" class="grid3"></div>
+  <div id="famList" style="margin-top:30px"></div>
+</section>
+
+<!-- ================= GRAF ================= -->
+<section class="view" id="v-graf">
+  <h2 class="sec">Graf powiązań</h2>
+  <p class="secsub">Węzły to materiały (kolor = kampania), krawędzie to powiązania (grubość = siła, czerwone = twardy dowód).
+    Kliknij krawędź, żeby zobaczyć przesłanki, albo węzeł – żeby otworzyć materiał.</p>
+  <div id="graphBox">
+    <svg id="gsvg"></svg>
+    <div class="tools">
+      <label class="check"><input type="checkbox" id="gWeak" onchange="drawGraph()"> pokaż słabe podobieństwa</label>
+      <label class="check"><input type="checkbox" id="gLabels" onchange="drawGraph()" checked> etykiety</label>
+      <div class="legend" id="gLegend" style="margin-top:8px; max-width:300px"></div>
+    </div>
+    <div class="panel" id="gPanel"></div>
+  </div>
+</section>
+
+<!-- ================= ZBIÓR ================= -->
+<section class="view" id="v-zbior">
+  <h2 class="sec">Zbiór danych</h2>
+  <p class="secsub">Import materiałów (ZIP z folderem, JSON, JSONL lub CSV – nazwy pól rozpoznawane automatycznie),
+    zbiór demonstracyjny, harmonogram skanowania bibliotek reklam i eksport wyników (Neo4j, CSV, JSON).</p>
+  <div class="grid3">
+    <div class="card">
+      <h3>Import</h3>
+      <div class="drop" id="dropImp"><b>Upuść ZIP / JSON / CSV</b><br><span class="hint">np. zbiór udostępniony przez organizatora</span></div>
+      <input type="file" id="inImp" accept=".zip,.json,.jsonl,.csv" hidden>
+      <label class="check" style="margin-top:10px"><input type="checkbox" id="impNet"> pobieraj metadane z sieci (wolniej)</label>
+      <div id="impStatus" class="muted" style="margin-top:10px"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn btn-ghost btn-sm" onclick="loadDemo()">Wczytaj zbiór demonstracyjny</button>
+        <button class="btn btn-danger btn-sm" onclick="clearAll()">Wyczyść</button>
+      </div>
+      <p class="hint">Zbiór demonstracyjny jest syntetyczny (wygenerowany), z etykietami kampanii do oceny metody.</p>
+    </div>
+    <div class="card">
+      <h3>Harmonogram skanowania</h3>
+      <div class="muted" id="schTok"></div>
+      <label class="f">Słowa kluczowe (jedno w linii)</label>
+      <textarea id="schKw" style="min-height:90px"></textarea>
+      <div class="row" style="margin-top:10px">
+        <label class="check"><input type="checkbox" id="schOn"> włączony</label>
+        <label class="check">co <input type="number" id="schInt" min="5" style="width:80px; padding:6px 8px"> min</label>
+      </div>
+      <label class="check" style="margin-top:6px"><input type="checkbox" id="schDom"> sprawdzaj ponownie znane domeny</label>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-primary btn-sm" onclick="saveSch()">Zapisz</button>
+        <button class="btn btn-ghost btn-sm" onclick="runSch()">Uruchom teraz</button>
+      </div>
+      <div id="schLog" class="hint" style="margin-top:10px; max-height:130px; overflow:auto"></div>
+    </div>
+    <div class="card">
+      <h3>Eksport</h3>
+      <p class="muted">Graf do bazy grafowej Neo4j (skrypt Cypher z uzasadnieniem każdej krawędzi), tabele i pełne wyniki.</p>
+      <div style="display:grid; gap:10px">
+        <a class="btn btn-ghost btn-sm" href="/api/export/graph.cypher">Neo4j (Cypher)</a>
+        <a class="btn btn-ghost btn-sm" href="/api/export/materialy.csv">Materiały (CSV)</a>
+        <a class="btn btn-ghost btn-sm" href="/api/export/powiazania.csv">Powiązania z przesłankami (CSV)</a>
+        <a class="btn btn-ghost btn-sm" href="/api/export/wyniki.json">Pełne wyniki (JSON)</a>
+      </div>
+      <h4>Moduły</h4>
+      <div id="caps" class="files"></div>
+    </div>
+  </div>
+  <h3 style="margin-top:34px">Materiały</h3>
+  <div id="itemTable"></div>
+</section>
+
+<!-- ================= OCENA ================= -->
+<section class="view" id="v-ocena">
+  <h2 class="sec">Ocena jakości grupowania</h2>
+  <p class="secsub">Liczona automatycznie, gdy materiały mają etykietę kampanii (pole label/campaign). Test „nowego materiału”
+    sprawdza, czy każdy materiał – udając nowy – trafia do właściwej kampanii, a materiał z osobnej kampanii pozostaje niepołączony.</p>
+  <div id="evalBox"></div>
+</section>
+
+<!-- ================= METODYKA ================= -->
+<section class="view" id="v-metodyka">
+  <div class="card md" id="mdBox">Wczytywanie…</div>
+</section>
+
+</div></main>
+
+<footer><div class="wrap">
+  <div class="foot-grid">
+    <div><span class="wordmark light">FOLLOW<i>THE</i>FAKE</span><p>Demonstrator rozwiązania wyzwania „Kolekcjoner fejków / Follow the Fake” – HackNation 2026.</p></div>
+    <div><b>Narzędzie</b><a onclick="go('analiza')">Analiza materiału</a><a onclick="go('kampanie')">Kampanie</a><a onclick="go('graf')">Graf powiązań</a></div>
+    <div><b>Dane</b><a onclick="go('zbior')">Zbiór i import</a><a onclick="go('ocena')">Ocena jakości</a><a onclick="go('metodyka')">Metodyka</a></div>
+    <div><b>Zgłoś oszustwo</b><a href="https://incydent.cert.pl" target="_blank" rel="noopener">incydent.cert.pl</a><span class="hint">SMS: 8080</span></div>
+  </div>
+  <div class="foot-legal">Projekt zespołu startującego w HackNation. Nie jest oficjalnym narzędziem NASK ani CERT Polska.</div>
+</div></footer>
+
+<div class="shade" id="shade" onclick="closeDrawer()"></div>
+<aside class="drawer" id="drawer"></aside>
+<div class="toast" id="toast"></div>
+<script src="/static/app.js"></script>
+</body>
+</html>
